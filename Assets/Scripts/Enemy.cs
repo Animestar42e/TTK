@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using Unity.VisualScripting;
+using UnityEngine;
 using UnityEngine.AI;
 
 public class EnemyController : MonoBehaviour
@@ -13,12 +15,31 @@ public class EnemyController : MonoBehaviour
     public int damage = 20;
     public float attackCooldown = 1.5f;
 
+    [Header("Block Reaction")]
+    public float knockbackForce = 5f;
+    public float knockbackTime = 0.25f;
+    public Color blockColor = Color.red;
+    public float colorTime = 0.3f;
+
+    [Header("Block Sound")]
+    public AudioSource blockSound;
+
     private NavMeshAgent agent;
     private float nextAttackTime = 0f;
+
+    private Renderer enemyRenderer;
+    private Color originalColor;
 
     void Start()
     {
         agent = GetComponent<NavMeshAgent>();
+
+        enemyRenderer = GetComponentInChildren<Renderer>();
+
+        if (enemyRenderer != null)
+        {
+            originalColor = enemyRenderer.material.color;
+        }
 
         if (player == null)
         {
@@ -28,6 +49,12 @@ public class EnemyController : MonoBehaviour
             {
                 player = playerObject.transform;
             }
+        }
+
+        // Make sure the block sound does not automatically play
+        if (blockSound != null)
+        {
+            blockSound.playOnAwake = false;
         }
     }
 
@@ -75,14 +102,12 @@ public class EnemyController : MonoBehaviour
         Vector3 attackOrigin = transform.position + Vector3.up;
         Vector3 attackDirection = transform.forward;
 
-        // Find everything the attack hits
         RaycastHit[] hits = Physics.RaycastAll(
             attackOrigin,
             attackDirection,
             attackDistance
         );
 
-        // Find the closest hit
         RaycastHit closestHit = new RaycastHit();
         bool foundTarget = false;
 
@@ -90,7 +115,7 @@ public class EnemyController : MonoBehaviour
 
         foreach (RaycastHit hit in hits)
         {
-            // Check if this is a Shield
+            // Shield
             if (hit.collider.CompareTag("Shield"))
             {
                 if (hit.distance < closestDistance)
@@ -101,7 +126,7 @@ public class EnemyController : MonoBehaviour
                 }
             }
 
-            // Check if this is the Player
+            // Player
             else if (hit.collider.CompareTag("Player"))
             {
                 if (hit.distance < closestDistance)
@@ -119,10 +144,32 @@ public class EnemyController : MonoBehaviour
             return;
         }
 
-        // 🛡️ SHIELD CHECKS FIRST
+        // 🛡️ SHIELD BLOCK
         if (closestHit.collider.CompareTag("Shield"))
         {
-            Debug.Log("ATTACK BLOCKED BY SHIELD!");
+            ShieldBlock shieldBlock =
+                closestHit.collider.GetComponentInParent<ShieldBlock>();
+
+            if (shieldBlock != null && shieldBlock.IsBlocking())
+            {
+                // Increase block counter
+                shieldBlock.SuccessfulBlock();
+
+                Debug.Log("ATTACK BLOCKED!");
+
+                // Play block sound
+                if (blockSound != null)
+                {
+                    blockSound.Play();
+                }
+
+                // Knock enemy backward
+                StartCoroutine(BlockReaction());
+
+                return;
+            }
+
+            Debug.Log("Shield was hit, but player is not blocking.");
             return;
         }
 
@@ -135,8 +182,52 @@ public class EnemyController : MonoBehaviour
             if (playerHealth != null)
             {
                 playerHealth.TakeDamage(damage);
+
                 Debug.Log("Player took " + damage + " damage!");
             }
         }
     }
+
+    IEnumerator BlockReaction()
+    {
+        // Stop enemy movement
+        agent.isStopped = true;
+
+        // Change color
+        if (enemyRenderer != null)
+        {
+            enemyRenderer.material.color = blockColor;
+        }
+
+        // Calculate knockback direction
+        Vector3 knockbackDirection =
+            (transform.position - player.position).normalized;
+
+        knockbackDirection.y = 0;
+
+        float timer = 0f;
+
+        while (timer < knockbackTime)
+        {
+            // Move enemy backward
+            Vector3 movement =
+                knockbackDirection * knockbackForce * Time.deltaTime;
+
+            agent.Move(movement);
+
+            timer += Time.deltaTime;
+
+            yield return null;
+        }
+
+        // Change color back
+        if (enemyRenderer != null)
+        {
+            enemyRenderer.material.color = originalColor;
+        }
+
+        // Let enemy chase again
+        agent.isStopped = false;
+    }
 }
+

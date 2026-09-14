@@ -1,11 +1,18 @@
 using UnityEngine;
+using TMPro;
 
 public class ShieldBlock : MonoBehaviour
 {
+    [Header("Shield")]
     public Collider shieldCollider;
     public GameObject blockEffect;
 
+    [Header("Block Key")]
     public KeyCode blockKey = KeyCode.F;
+
+    [Header("Block Counter")]
+    public int blockCount = 0;
+    public TMP_Text blockCounterText;
 
     private bool isBlocking;
 
@@ -20,6 +27,8 @@ public class ShieldBlock : MonoBehaviour
         {
             blockEffect.SetActive(false);
         }
+
+        UpdateBlockCounter();
     }
 
     void Update()
@@ -57,5 +66,23 @@ public class ShieldBlock : MonoBehaviour
     public bool IsBlocking()
     {
         return isBlocking;
+    }
+
+    // Call this when an enemy attack is successfully blocked
+    public void SuccessfulBlock()
+    {
+        blockCount++;
+
+        UpdateBlockCounter();
+
+        Debug.Log("Successful Blocks: " + blockCount);
+    }
+
+    void UpdateBlockCounter()
+    {
+        if (blockCounterText != null)
+        {
+            blockCounterText.text = "Blocks: " + blockCount;
+        }
     }
 }
