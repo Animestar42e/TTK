@@ -1,8 +1,15 @@
-﻿using UnityEngine;
+﻿
+using UnityEngine;
 
 public class HealthPack : MonoBehaviour
 {
     public int healAmount = 25;
+    public float rotationSpeed = -100f;
+
+    private void Update()
+    {
+        transform.Rotate(0f, rotationSpeed * Time.deltaTime, 0f);
+    }
 
     private void OnTriggerEnter(Collider other)
     {
