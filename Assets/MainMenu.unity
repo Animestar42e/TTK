@@ -4714,13 +4714,13 @@ ParticleSystem:
     minVertexDistance: 0.2
     textureMode: 0
     textureScale: {x: 0.2, y: 0.2}
-    ribbonCount: 12
+    ribbonCount: 23
     shadowBias: 0.5
     worldSpace: 0
     dieWithParticles: 1
     sizeAffectsWidth: 0
     sizeAffectsLifetime: 0
-    inheritParticleColor: 1
+    inheritParticleColor: 0
     generateLightingData: 0
     splitSubEmitterRibbons: 0
     attachRibbonsToTransform: 0

@@ -4,7 +4,7 @@ using UnityEngine;
 public class HealthPack : MonoBehaviour
 {
     public int healAmount = 25;
-    public float rotationSpeed = -100f;
+    public float rotationSpeed = 100f;
 
     private void Update()
     {
