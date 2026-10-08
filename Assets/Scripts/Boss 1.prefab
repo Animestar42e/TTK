@@ -5215,7 +5215,7 @@ GameObject:
   - component: {fileID: 5207487636698604576}
   - component: {fileID: 7879514866938330964}
   m_Layer: 0
-  m_Name: Enemy (4)
+  m_Name: Boss 1
   m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5332,7 +5332,7 @@ MonoBehaviour:
   player: {fileID: 0}
   attackDistance: 10
   damage: 99
-  attackCooldown: 2
+  attackCooldown: 10
   knockbackForce: 100
   knockbackTime: 30
   blockColor: {r: 0.16470589, g: 0.16470589, b: 0.16470589, a: 1}
